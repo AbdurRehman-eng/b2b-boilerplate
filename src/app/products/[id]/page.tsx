@@ -1,17 +1,25 @@
 'use client';
 
-import { useState } from 'react';
-import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [productId, setProductId] = useState<string>('');
+
+  // Handle async params
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setProductId(resolvedParams.id);
+    });
+  }, [params]);
 
   // Mock product data - in a real app, this would come from an API
   const product = {
-    id: params.id,
+    id: productId || 'loading',
     name: 'Wireless Bluetooth Headphones Premium Edition',
     price: 89.99,
     originalPrice: 129.99,
