@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+
 import { Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -231,7 +231,6 @@ export default function FeaturedProducts() {
                     <Heart size={16} className={isInWishlist(product.id) ? 'fill-current' : ''} />
                   </button>
                   <button
-                    onClick={() => setQuickView(product.id)}
                     className="p-2 rounded-full bg-white text-gray-600 hover:text-primary shadow-lg transition-colors"
                   >
                     <Eye size={16} />
