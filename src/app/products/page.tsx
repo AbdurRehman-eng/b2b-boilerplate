@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Grid, List, Search, Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 export default function ProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -10,6 +12,9 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const categories = [
     'Electronics', 'Fashion', 'Home & Garden', 'Sports & Fitness', 
@@ -123,12 +128,89 @@ export default function ProductsPage() {
     }
   ];
 
+  // Filter and search products
+  const filteredProducts = useMemo(() => {
+    let filtered = products;
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(product =>
+        selectedCategories.includes(product.category)
+      );
+    }
+
+    // Price filter
+    filtered = filtered.filter(product =>
+      product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
+
+    // Sort products
+    switch (sortBy) {
+      case 'price-low':
+        filtered = [...filtered].sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered = [...filtered].sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        filtered = [...filtered].sort((a, b) => b.rating - a.rating);
+        break;
+      case 'newest':
+        filtered = [...filtered].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        break;
+      default:
+        // Featured - keep original order
+        break;
+    }
+
+    return filtered;
+  }, [products, searchQuery, selectedCategories, priceRange, sortBy]);
+
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
       prev.includes(category)
         ? prev.filter(c => c !== category)
         : [...prev, category]
     );
+  };
+
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+    });
+  };
+
+  const handleWishlistToggle = (product: any) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+      });
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setSelectedCategories([]);
+    setPriceRange([0, 1000]);
+    setSortBy('featured');
   };
 
   const renderStars = (rating: number) => {
@@ -222,7 +304,10 @@ export default function ProductsPage() {
               </div>
 
               {/* Clear Filters */}
-              <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+              <button 
+                onClick={clearAllFilters}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+              >
                 Clear All Filters
               </button>
             </div>
@@ -235,7 +320,7 @@ export default function ProductsPage() {
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-600">
-                    {products.length} products found
+                    {filteredProducts.length} products found
                   </span>
                 </div>
                 
@@ -277,10 +362,10 @@ export default function ProductsPage() {
               ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
               : 'space-y-4'
             }>
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow ${
+                  className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group ${
                     viewMode === 'list' ? 'flex' : ''
                   }`}
                 >
@@ -308,8 +393,15 @@ export default function ProductsPage() {
 
                     {/* Quick Actions */}
                     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-sm transition-colors">
-                        <Heart size={14} />
+                      <button 
+                        onClick={() => handleWishlistToggle(product)}
+                        className={`p-1.5 rounded-full shadow-sm transition-colors ${
+                          isInWishlist(product.id) 
+                            ? 'bg-red-500 text-white' 
+                            : 'bg-white text-gray-600 hover:text-red-500'
+                        }`}
+                      >
+                        <Heart size={14} className={isInWishlist(product.id) ? 'fill-current' : ''} />
                       </button>
                       <button className="p-1.5 rounded-full bg-white text-gray-600 hover:text-primary shadow-sm transition-colors">
                         <Eye size={14} />
@@ -358,7 +450,10 @@ export default function ProductsPage() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <button className="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => handleAddToCart(product)}
+                        className="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+                      >
                         <ShoppingCart size={16} />
                         Add to Cart
                       </button>
@@ -368,20 +463,35 @@ export default function ProductsPage() {
               ))}
             </div>
 
+            {/* No Results */}
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+                <button 
+                  onClick={clearAllFilters}
+                  className="mt-4 text-primary hover:text-primary-dark font-medium"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            )}
+
             {/* Pagination */}
-            <div className="mt-8 flex justify-center">
-              <nav className="flex items-center gap-2">
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                  Previous
-                </button>
-                <button className="px-3 py-2 text-sm bg-primary text-white rounded-lg">1</button>
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">2</button>
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">3</button>
-                <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                  Next
-                </button>
-              </nav>
-            </div>
+            {filteredProducts.length > 0 && (
+              <div className="mt-8 flex justify-center">
+                <nav className="flex items-center gap-2">
+                  <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    Previous
+                  </button>
+                  <button className="px-3 py-2 text-sm bg-primary text-white rounded-lg">1</button>
+                  <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">2</button>
+                  <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">3</button>
+                  <button className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    Next
+                  </button>
+                </nav>
+              </div>
+            )}
           </div>
         </div>
       </div>
