@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Heart, ShoppingCart, Eye, Star as StarFilled } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 
 export default function FeaturedProducts() {
   const [wishlist, setWishlist] = useState<number[]>([]);
@@ -128,7 +128,7 @@ export default function FeaturedProducts() {
     const hasHalfStar = rating % 1 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<StarFilled key={i} size={16} className="fill-yellow-400 text-yellow-400" />);
+      stars.push(<Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />);
     }
 
     if (hasHalfStar) {

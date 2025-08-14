@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Grid, List, Filter, Search, Star, Heart, ShoppingCart, Eye } from 'lucide-react';
+import { Grid, List, Search, Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProductsPage() {

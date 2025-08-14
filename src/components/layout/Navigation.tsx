@@ -1,7 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Building2, Users, Package, Truck, Shield, Headphones } from 'lucide-react';
+import { 
+  ChevronDown, 
+  Building2, 
+  Users, 
+  Package, 
+  Truck, 
+  Shield, 
+  Headphones, 
+  Home, 
+  Activity, 
+  Car, 
+  Heart, 
+  CreditCard, 
+  Code, 
+  RotateCcw 
+} from 'lucide-react';
 
 export default function Navigation() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -114,12 +129,3 @@ export default function Navigation() {
     </nav>
   );
 }
-
-// Placeholder icons for categories
-const Home = ({ size }: { size: number }) => <div className="w-4 h-4 bg-gray-400 rounded" />;
-const Activity = ({ size }: { size: number }) => <div className="w-4 h-4 bg-gray-400 rounded" />;
-const Car = ({ size }: { size: number }) => <div className="w-4 h-4 bg-gray-400 rounded" />;
-const Heart = ({ size }: { size: number }) => <div className="w-4 h-4 bg-gray-400 rounded" />;
-const CreditCard = ({ size }: { size: number }) => <div className="w-4 h-4 bg-gray-400 rounded" />;
-const Code = ({ size }: { size: number }) => <div className="w-4 h-4 bg-gray-400 rounded" />;
-const RotateCcw = ({ size }: { size: number }) => <div className="w-4 h-4 bg-gray-400 rounded" />;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Package, Users, Home, Activity, Car, Heart, ShoppingBag, Star } from 'lucide-react';
+import { Package, Users, Home, Activity, Car, Heart } from 'lucide-react';
 
 export default function FeaturedCategories() {
   const categories = [
