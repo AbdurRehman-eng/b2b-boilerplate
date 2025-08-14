@@ -1,29 +1,13 @@
 'use client';
 
-
+import { useState } from 'react';
 import { Star, Heart, ShoppingCart, Eye } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  category: string;
-  isNew: boolean;
-  discount: number;
-  stock: string;
-}
 
 export default function FeaturedProducts() {
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const [wishlist, setWishlist] = useState<number[]>([]);
+  const [quickView, setQuickView] = useState<number | null>(null);
 
-  const products: Product[] = [
+  const products = [
     {
       id: 1,
       name: 'Wireless Bluetooth Headphones',
@@ -130,28 +114,12 @@ export default function FeaturedProducts() {
     }
   ];
 
-  const handleAddToCart = (product: Product) => {
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      category: product.category,
-    });
-  };
-
-  const handleWishlistToggle = (product: Product) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        category: product.category,
-      });
-    }
+  const toggleWishlist = (productId: number) => {
+    setWishlist(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
   };
 
   const renderStars = (rating: number) => {
@@ -221,16 +189,17 @@ export default function FeaturedProducts() {
                 {/* Quick Actions */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
-                    onClick={() => handleWishlistToggle(product)}
+                    onClick={() => toggleWishlist(product.id)}
                     className={`p-2 rounded-full shadow-lg transition-colors ${
-                      isInWishlist(product.id)
+                      wishlist.includes(product.id)
                         ? 'bg-red-500 text-white'
                         : 'bg-white text-gray-600 hover:text-red-500'
                     }`}
                   >
-                    <Heart size={16} className={isInWishlist(product.id) ? 'fill-current' : ''} />
+                    <Heart size={16} className={wishlist.includes(product.id) ? 'fill-current' : ''} />
                   </button>
                   <button
+                    onClick={() => setQuickView(product.id)}
                     className="p-2 rounded-full bg-white text-gray-600 hover:text-primary shadow-lg transition-colors"
                   >
                     <Eye size={16} />
@@ -277,10 +246,7 @@ export default function FeaturedProducts() {
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <button 
-                    onClick={() => handleAddToCart(product)}
-                    className="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-                  >
+                  <button className="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
                     <ShoppingCart size={16} />
                     Add to Cart
                   </button>

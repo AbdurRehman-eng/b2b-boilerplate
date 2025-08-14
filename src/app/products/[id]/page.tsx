@@ -3,17 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const [productId, setProductId] = useState<string>('');
-  const [showAddedToCart, setShowAddedToCart] = useState(false);
-
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   // Handle async params
   useEffect(() => {
@@ -61,33 +56,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
 
-  const handleAddToCart = () => {
-    addToCart({
-      id: parseInt(productId) || 1,
-      name: product.name,
-      price: product.price,
-      image: product.images[0],
-      category: product.category,
-    });
-    
-    setShowAddedToCart(true);
-    setTimeout(() => setShowAddedToCart(false), 2000);
-  };
-
-  const handleWishlistToggle = () => {
-    if (isInWishlist(parseInt(productId) || 1)) {
-      removeFromWishlist(parseInt(productId) || 1);
-    } else {
-      addToWishlist({
-        id: parseInt(productId) || 1,
-        name: product.name,
-        price: product.price,
-        image: product.images[0],
-        category: product.category,
-      });
-    }
-  };
-
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -111,13 +79,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Success Message */}
-      {showAddedToCart && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
-          ✓ Added to cart successfully!
-        </div>
-      )}
-
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -255,22 +216,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
 
               <div className="flex gap-3">
-                <button 
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg font-semibold text-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                >
+                <button className="flex-1 bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg font-semibold text-lg transition-colors duration-200 flex items-center justify-center gap-2">
                   <ShoppingCart size={20} />
                   Add to Cart
                 </button>
                 <button
-                  onClick={handleWishlistToggle}
+                  onClick={() => setIsWishlisted(!isWishlisted)}
                   className={`p-3 rounded-lg border-2 transition-colors duration-200 ${
-                    isInWishlist(parseInt(productId) || 1)
+                    isWishlisted
                       ? 'border-red-500 bg-red-500 text-white'
                       : 'border-gray-300 text-gray-600 hover:border-gray-400'
                   }`}
                 >
-                  <Heart size={20} className={isInWishlist(parseInt(productId) || 1) ? 'fill-current' : ''} />
+                  <Heart size={20} className={isWishlisted ? 'fill-current' : ''} />
                 </button>
               </div>
             </div>
