@@ -6,6 +6,20 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  originalPrice: number;
+  rating: number;
+  reviewCount: number;
+  image: string;
+  category: string;
+  isNew: boolean;
+  discount: number;
+  stock: string;
+}
+
 export default function ProductsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('featured');
@@ -21,7 +35,8 @@ export default function ProductsPage() {
     'Automotive', 'Health & Beauty', 'Books', 'Toys & Games'
   ];
 
-  const products = [
+  // Move products array inside useMemo to fix dependency warning
+  const products = useMemo(() => [
     {
       id: 1,
       name: 'Wireless Bluetooth Headphones',
@@ -126,7 +141,7 @@ export default function ProductsPage() {
       discount: 30,
       stock: 'In Stock'
     }
-  ];
+  ], []);
 
   // Filter and search products
   const filteredProducts = useMemo(() => {
@@ -182,7 +197,7 @@ export default function ProductsPage() {
     );
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addToCart({
       id: product.id,
       name: product.name,
@@ -192,7 +207,7 @@ export default function ProductsPage() {
     });
   };
 
-  const handleWishlistToggle = (product: any) => {
+  const handleWishlistToggle = (product: Product) => {
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
     } else {

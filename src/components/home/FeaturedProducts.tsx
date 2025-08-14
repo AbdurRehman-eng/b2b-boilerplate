@@ -5,12 +5,25 @@ import { Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  originalPrice: number;
+  rating: number;
+  reviewCount: number;
+  image: string;
+  category: string;
+  isNew: boolean;
+  discount: number;
+  stock: string;
+}
+
 export default function FeaturedProducts() {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const [quickView, setQuickView] = useState<number | null>(null);
 
-  const products = [
+  const products: Product[] = [
     {
       id: 1,
       name: 'Wireless Bluetooth Headphones',
@@ -117,7 +130,7 @@ export default function FeaturedProducts() {
     }
   ];
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addToCart({
       id: product.id,
       name: product.name,
@@ -127,7 +140,7 @@ export default function FeaturedProducts() {
     });
   };
 
-  const handleWishlistToggle = (product: any) => {
+  const handleWishlistToggle = (product: Product) => {
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
     } else {
